@@ -14,7 +14,7 @@ datadir = readLines(here("data_dir.txt"), n=1)
 
 
 # Load data
-d = read_csv(file.path(datadir,"field-data/processed/plot-data-prepped.csv"))
+d = read_csv(file.path(datadir,"plot-data-prepped.csv"))
 
 
 

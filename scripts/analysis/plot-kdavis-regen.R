@@ -6,7 +6,7 @@ library(here)
 # The root of the data directory
 datadir = readLines(here("data_dir.txt"), n=1)
 
-d = read_csv(file.path(datadir, "external-field/Davis_et_al_regen_plot_data.csv"))
+d = read_csv(file.path(datadir, "Davis_et_al_regen_plot_data.csv")) # This data file is publicly available as supporting data to the article here: https://www.pnas.org/doi/10.1073/pnas.2208120120
 
 ## exclude plots that are only PICO, and sum all species but PICO
 d = d |>

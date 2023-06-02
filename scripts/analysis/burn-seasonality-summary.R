@@ -8,7 +8,7 @@ datadir = readLines(here("data_dir.txt"), n=1)
 
 
 # Load data
-d = read_csv(file.path(datadir,"day-of-burning-tabular-summary/fire_daily_area_2002_2021.csv")) |>
+d = read_csv(file.path(datadir,"fire_daily_area_2002_2021.csv")) |>
   mutate(month_day = str_sub(date, 6, 10))
 
 d_s = d |>
