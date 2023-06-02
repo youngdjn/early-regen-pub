@@ -4,7 +4,7 @@ Analysis of early post-fire forest regeneration dynamics and aerial seedbanking,
 
 ## Data management for this repository
 
-The code files in this repository are set up to access a data folder located anywhere on the same machine. The path to the data folder should be saved in the file `data-dir.txt`, which each of the scripts reads prior to reading data files. The dataset, in the exact structure expected by this repository, is published in the Dryad repository at [link to be provided upon publication]().
+The code files in this repository are set up to access a data folder located anywhere on the same machine. The path to the data folder should be saved in the file `data-dir.txt`, which each of the scripts reads prior to reading data files. The dataset, with the file names as expected by the code in this repository, is published in the Dryad repository at [link to be provided upon publication]().
 
 ## Terminology
 
