@@ -156,7 +156,7 @@ d_mods = bind_rows(d_mod_all_core,
 ymin = 0.05
 ymax = 25
 
-p1 = make_scenario_ggplot(scenario_preds, d_mods, "fire_intens", "Torching extent (%)", ymin = ymin, ymax = ymax)
+p1 = make_scenario_ggplot(scenario_preds, d_mods, "fire_intens", "Canopy burn fraction (%)", ymin = ymin, ymax = ymax)
 p2 = make_scenario_ggplot(scenario_preds, d_mods, "ppt", "Mean annual precipitation (mm)", ymin = ymin, ymax = ymax)
 
 p = ggarrange(p1, p2 + rremove("ylab") + rremove("y.text"), common.legend = TRUE, widths = c(1.2,1))
@@ -219,7 +219,7 @@ d_mod_all_core = prep_d_core_mod(d_sp) |>
 m = gam(seedl_dens_sp ~ s(fire_intens, k = 3) + s(ppt, k = 3) , data = d_mod_all_core, family = poisson, method = "REML")
 ppt_split = 1200 # split between low and high precip
 scenario_preds = get_scenario_preds(m, d_mod_all_core, "fire_intens", sp = "All conifers", percentile_exclude = percentile_exclude, interacting_predictor = "ppt", interacting_splits = ppt_split) |> mutate(type = "Interior")
-p1 = make_scenario_w_ppt_ggplot(scenario_preds, d_mod_all_core, "fire_intens", "Torching extent (%)", ymin = NULL, ymax = NULL, interacting_splits = ppt_split, show_data = TRUE)
+p1 = make_scenario_w_ppt_ggplot(scenario_preds, d_mod_all_core, "fire_intens", "Canopy burn fraction (%)", ymin = NULL, ymax = NULL, interacting_splits = ppt_split, show_data = TRUE)
 
 png(file.path(datadir, "figures/fits_w_data.png"), res = 700, width = 2800, height = 2400)
 p1

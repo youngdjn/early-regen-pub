@@ -72,7 +72,7 @@ plot_raw_data = function(d_sp, axis_label, plot_title, filename) {
   
   # Classify fire intens
   d_sp_nogrn_fig = d_sp_nogrn |>
-    mutate(fire_intens_cat = ifelse(fire_intens < intensity_threshold, "Scorched", "Torched"))
+    mutate(fire_intens_cat = ifelse(fire_intens < intensity_threshold, "Low canopy\nburn fraction", "High canopy\nburn fraction"))
   
   ### Before making the main figure, use the same data to make a context figure: plot day of burning, precip, and plot type
   allplots = bind_rows(d_sp_nogrn_fig, d_sp_sw) |>
@@ -115,13 +115,13 @@ plot_raw_data = function(d_sp, axis_label, plot_title, filename) {
     core_blk_foc = d_sp_nogrn_fig |>
       filter(fire == window$fire) |>
       filter(between(date_of_burning, window$start, window$end)) |>
-      filter(fire_intens_cat == "Torched",)
+      filter(fire_intens_cat == "High canopy\nburn fraction",)
     core_blk_median = median(core_blk_foc$seedl_dens_sp)
     
     core_brn_foc = d_sp_nogrn_fig |>
       filter(fire == window$fire) |>
       filter(between(date_of_burning, window$start, window$end)) |>
-      filter(fire_intens_cat == "Scorched")
+      filter(fire_intens_cat == "Low canopy\nburn fraction")
     core_brn_median = median(core_brn_foc$seedl_dens_sp)
     
     sw_foc = d_sp_sw |>
@@ -142,7 +142,7 @@ plot_raw_data = function(d_sp, axis_label, plot_title, filename) {
     geom_jitter(data = d_sp_sw, color="#A2D435", size=4, height=0, width=2, aes(shape=dist_sw_cat)) +
     geom_jitter(size=4, height = 0, width=2, aes(color = fire_intens_cat)) +
     labs(shape = "Edge") +
-    scale_color_manual(values = c(Torched = "black", Scorched = "#9D5B0B"), name = "Interior") +
+    scale_color_manual(values = c(`High canopy\nburn fraction` = "black", `Low canopy\nburn fraction` = "#9D5B0B"), name = "Interior") +
     scale_shape_manual(values = c("Near" = 1, "Very near" = 19)) +
     facet_grid(~fire) +
     theme_bw(15) +
@@ -150,11 +150,14 @@ plot_raw_data = function(d_sp, axis_label, plot_title, filename) {
           strip.text.x = element_text(size = 16),
           legend.position = c(0.12,.67),
           legend.background = element_blank(),
-          legend.box.background = element_rect(fill="white", color = "black", linewidth = 0.3)) +
+          legend.box.background = element_rect(fill="white", color = "black", linewidth = 0.3)  #,           legend.key.size = unit(1.5, 'lines')
+          ) +
     labs(x = "Day of Burning", y = axis_label, title = plot_title) +
     scale_y_continuous(breaks = c(0.0005, .001,.01,.1,1,10,100), minor_breaks = c(0.005, 0.05, 0.5, 5.0, 50), labels = c("[0]", "0.001","0.01", "0.1", "1", "10","100")  ) +
     scale_x_date(date_labels = "%d-%b", minor_breaks = NULL) +
     coord_trans(y = "log") +
+    guides(colour = guide_legend(order = 1, keyheight = 2), 
+             shape = guide_legend(order = 2)) +
     geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = seedwall_median, yend = seedwall_median), linewidth = 1.5, color = "white") +
     geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = core_blk_median, yend = core_blk_median), linewidth = 1.5, color = "white") +
     geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = core_brn_median, yend = core_brn_median), linewidth = 1.5, color = "white") +
