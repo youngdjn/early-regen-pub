@@ -171,6 +171,80 @@ plot_raw_data = function(d_sp, axis_label, plot_title, filename) {
   
 }
 
+
+
+#### Alternative data summary figure, alternative to above function: Plot distribution of seedling density by plot category and time period category
+
+plot_raw_seedl_dens = function(d_sp, axis_label, plot_title, filename) {
+  
+  browser()
+  
+  # Make zeros nonzero so they can be displayed on the log scale axis
+  d_sp = d_sp |>
+    mutate(seedl_dens_sp = ifelse(seedl_dens_sp < 0.00001, 0.0005, seedl_dens_sp))
+  
+  ## Turn day of burning to a date
+  d_sp = d_sp |>
+    mutate(date_of_burning = ymd("2021-01-01") + day_of_burning-1) # For fires the burned in other years, will need more flexible here, at least for leap years
+  
+  # Get the core area plots, far from any green of the focal species
+  d_sp_nogrn = d_sp |>
+    filter(grn_vol_abs_sp == 0,
+           ((is.na(dist_grn_sp) | dist_grn_sp > 100) & sight_line > 100),
+           plot_type %in% c("core", "delayed"))
+  
+  # Get seed wall plots
+  d_sp_sw = d_sp |>
+    filter(plot_type == "seedwall") |>
+    filter(dist_sw <= 60) |>
+    # classify into near and far seed wall plots
+    mutate(dist_sw_cat = ifelse(dist_sw < 30, "Very near", "Near")) |>
+    mutate(dist_sw_cat = as.factor(dist_sw_cat)) |>
+    mutate(dist_sw_cat = factor(dist_sw_cat, levels = c("Very near", "Near")))
+  
+  # Classify fire intens
+  d_sp_nogrn_fig = d_sp_nogrn |>
+    mutate(fire_intens_cat = ifelse(fire_intens < intensity_threshold, "Interior, low canopy burn fraction", "Interior, high canopy burn fraction"))
+  
+  
+  ### Combine core and seed wall into one DF so can plot as separate facets
+  d_sp_nogrn_fig = d_sp_nogrn_fig |>
+    mutate(plot_type = fire_intens_cat)
+  
+  d_sp_sw = d_sp_sw |>
+    mutate(plot_type = "Edge")
+  
+  d_fig = bind_rows(d_sp_nogrn_fig, d_sp_sw)
+  
+  # define early and later burned
+  d_fig = d_fig |>
+    mutate(burn_date_cat = ifelse(date_of_burning > ymd("2021-08-01"), "Late", "Early"))
+  
+  
+  ### Make figure: for each plot type ()
+  ggplot(d_fig, aes(x = burn_date_cat, y = seedl_dens_sp)) +
+    geom_jitter(height = 0, alpha = 0.3, size = 0.5, width = 0.25) +
+    geom_boxplot(fill = NA, coef = 0, outlier.shape = NA, width = 0.5) +
+    facet_wrap(~plot_type) +
+    scale_y_continuous(breaks = c(0.0005, .001,.01,.1,1,10,100), minor_breaks = c(0.005, 0.05, 0.5, 5.0, 50), labels = c("[0]", "0.001","0.01", "0.1", "1", "10","100")  ) +
+    coord_trans(y = "log") +
+    theme_bw()
+  
+  
+  
+  
+  
+  png(file.path(datadir, paste0("figures/raw_seedl_dens_", filename, ".png")), res = 350*2, width = 4500*2, height = 2400*2)
+  print(p)
+  dev.off()
+  
+}
+
+
+
+
+
+
 # Prep core-area data for modeling: filter to later-burned, no green of focal species, and no surviving trees within 100 m
 prep_d_core_mod = function(d_sp) {
   d_mod = d_sp |>

@@ -73,6 +73,13 @@ d_sp = prep_d_sp("ALL")
 plot_raw_data(d_sp, axis_label = bquote(Conifer~seedlings~m^-2), plot_title = NULL, filename = "all")
 
 
+# Alternatve version
+plot_raw_seedl_dens(d_sp, axis_label = bquote(Conifer~seedlings~m^-2), plot_title = NULL, filename = "plot_raw_seedl_dens")
+
+
+
+
+
 ##### Fit GAMs for predicting seedling density using fire intensity and climate
 
 ### Core
