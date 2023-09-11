@@ -135,8 +135,6 @@ plot_raw_data = function(d_sp, axis_label, plot_title, filename) {
     
   }
   
-  browser()
-  
   # Make fig
   p = ggplot(d_sp_nogrn_fig, aes(x = date_of_burning, y = seedl_dens_sp)) +
     geom_hline(yintercept = 0.0173, linetype = "dashed", color="gray70") +
