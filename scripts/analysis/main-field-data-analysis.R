@@ -25,6 +25,9 @@ windows = data.frame(fire = c("Caldor","Caldor", "Dixie", "Dixie", "Dixie"),
                      start = c(229, 239, 203, 225, 252),
                      end =   c(231, 242, 205, 230, 252))
 
+## Minimum distance (m) from an interior plot to a green tree (sight line must also go that far)
+minimum_dist_green = 60
+
 # When plotting model fits, trim to range of data minus the following percentile of data points at both extremes
 percentile_exclude = 0.025
 
@@ -73,7 +76,7 @@ d_sp = prep_d_sp("ALL")
 plot_raw_data(d_sp, axis_label = bquote(Conifer~seedlings~m^-2), plot_title = NULL, filename = "all")
 
 
-# Alternatve version
+# Alternate version
 plot_raw_seedl_dens(d_sp, axis_label = bquote(Conifer~seedlings~m^-2), plot_title = NULL, filename = "plot_raw_seedl_dens")
 
 

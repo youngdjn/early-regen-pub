@@ -58,7 +58,7 @@ plot_raw_data = function(d_sp, axis_label, plot_title, filename) {
   # Get the core area plots, far from any green of the focal species
   d_sp_nogrn = d_sp |>
     filter(grn_vol_abs_sp == 0,
-           ((is.na(dist_grn_sp) | dist_grn_sp > 100) & sight_line > 100),
+           ((is.na(dist_grn_sp) | dist_grn_sp > minimum_dist_green) & sight_line > minimum_dist_green),
            plot_type %in% c("core", "delayed"))
   
   # Get seed wall plots
@@ -139,8 +139,8 @@ plot_raw_data = function(d_sp, axis_label, plot_title, filename) {
   p = ggplot(d_sp_nogrn_fig, aes(x = date_of_burning, y = seedl_dens_sp)) +
     geom_hline(yintercept = 0.0173, linetype = "dashed", color="gray70") +
     #geom_hline(yintercept = 0.0005, color = "orange") +
-    geom_jitter(data = d_sp_sw, color="#A2D435", size=2, height=0, width=2, aes(shape=dist_sw_cat)) +
-    geom_jitter(size=2, height = 0, width=2, aes(color = fire_intens_cat)) +
+    geom_jitter(data = d_sp_sw, color="#A2D435", size=2.5, height=0, width=2, show.legend = TRUE) + # , aes(shape=dist_sw_cat)
+    geom_jitter(size=2.5, height = 0, width=2, aes(color = fire_intens_cat)) +
     labs(shape = "Edge") +
     scale_color_manual(values = c(`High canopy\nburn fraction` = "black", `Low canopy\nburn fraction` = "#9D5B0B"), name = "Interior") +
     scale_shape_manual(values = c("Near" = 1, "Very near" = 19)) +
@@ -176,9 +176,7 @@ plot_raw_data = function(d_sp, axis_label, plot_title, filename) {
 #### Alternative data summary figure, alternative to above function: Plot distribution of seedling density by plot category and time period category
 
 plot_raw_seedl_dens = function(d_sp, axis_label, plot_title, filename) {
-  
-  browser()
-  
+
   # Make zeros nonzero so they can be displayed on the log scale axis
   d_sp = d_sp |>
     mutate(seedl_dens_sp = ifelse(seedl_dens_sp < 0.00001, 0.0005, seedl_dens_sp))
@@ -190,7 +188,7 @@ plot_raw_seedl_dens = function(d_sp, axis_label, plot_title, filename) {
   # Get the core area plots, far from any green of the focal species
   d_sp_nogrn = d_sp |>
     filter(grn_vol_abs_sp == 0,
-           ((is.na(dist_grn_sp) | dist_grn_sp > 100) & sight_line > 100),
+           ((is.na(dist_grn_sp) | dist_grn_sp > minimum_dist_green) & sight_line > minimum_dist_green),
            plot_type %in% c("core", "delayed"))
   
   # Get seed wall plots
@@ -222,7 +220,7 @@ plot_raw_seedl_dens = function(d_sp, axis_label, plot_title, filename) {
   
   
   ### Make figure: for each plot type ()
-  ggplot(d_fig, aes(x = burn_date_cat, y = seedl_dens_sp)) +
+  p = ggplot(d_fig, aes(x = burn_date_cat, y = seedl_dens_sp)) +
     geom_jitter(height = 0, alpha = 0.3, size = 0.5, width = 0.25) +
     geom_boxplot(fill = NA, coef = 0, outlier.shape = NA, width = 0.5) +
     facet_wrap(~plot_type) +
@@ -250,7 +248,7 @@ prep_d_core_mod = function(d_sp) {
   d_mod = d_sp |>
     filter(day_of_burning > 220) |>
     filter(grn_vol_abs_sp == 0,
-           ((is.na(dist_grn_sp) | dist_grn_sp > 100) & sight_line > 100),
+           ((is.na(dist_grn_sp) | dist_grn_sp > minimum_dist_green) & sight_line > minimum_dist_green),
            plot_type %in% c("core", "delayed"))
   
   return(d_mod)
