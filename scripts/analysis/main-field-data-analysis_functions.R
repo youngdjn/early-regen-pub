@@ -135,12 +135,14 @@ plot_raw_data = function(d_sp, axis_label, plot_title, filename) {
     
   }
   
+  browser()
+  
   # Make fig
   p = ggplot(d_sp_nogrn_fig, aes(x = date_of_burning, y = seedl_dens_sp)) +
     geom_hline(yintercept = 0.0173, linetype = "dashed", color="gray70") +
     #geom_hline(yintercept = 0.0005, color = "orange") +
-    geom_jitter(data = d_sp_sw, color="#A2D435", size=4, height=0, width=2, aes(shape=dist_sw_cat)) +
-    geom_jitter(size=4, height = 0, width=2, aes(color = fire_intens_cat)) +
+    geom_jitter(data = d_sp_sw, color="#A2D435", size=2, height=0, width=2, aes(shape=dist_sw_cat)) +
+    geom_jitter(size=2, height = 0, width=2, aes(color = fire_intens_cat)) +
     labs(shape = "Edge") +
     scale_color_manual(values = c(`High canopy\nburn fraction` = "black", `Low canopy\nburn fraction` = "#9D5B0B"), name = "Interior") +
     scale_shape_manual(values = c("Near" = 1, "Very near" = 19)) +
@@ -158,14 +160,14 @@ plot_raw_data = function(d_sp, axis_label, plot_title, filename) {
     coord_trans(y = "log") +
     guides(colour = guide_legend(order = 1, keyheight = 2), 
              shape = guide_legend(order = 2)) +
-    geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = seedwall_median, yend = seedwall_median), linewidth = 1.5, color = "white") +
-    geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = core_blk_median, yend = core_blk_median), linewidth = 1.5, color = "white") +
-    geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = core_brn_median, yend = core_brn_median), linewidth = 1.5, color = "white") +
-    geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = seedwall_median, yend = seedwall_median), linewidth = 1, color = "#A2D435") +
-    geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = core_blk_median, yend = core_blk_median), linewidth = 1, color = "black") +
-    geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = core_brn_median, yend = core_brn_median), linewidth = 1, color = "#9D5B0B")
+    geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = seedwall_median, yend = seedwall_median), linewidth = 2, color = "white") +
+    geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = core_blk_median, yend = core_blk_median), linewidth = 2, color = "white") +
+    geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = core_brn_median, yend = core_brn_median), linewidth = 2, color = "white") +
+    geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = seedwall_median, yend = seedwall_median), linewidth = 1.5, color = "#A2D435") +
+    geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = core_blk_median, yend = core_blk_median), linewidth = 1.5, color = "black") +
+    geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = core_brn_median, yend = core_brn_median), linewidth = 1.5, color = "#9D5B0B")
 
-  png(file.path(datadir, paste0("figures/raw_data_", filename, ".png")), res = 350*2, width = 4500*2, height = 2400*2)
+  png(file.path(datadir, paste0("figures/raw_data_", filename, "_new.png")), res = 350*2, width = 4500*2, height = 2400*2)
   print(p)
   dev.off()
   
