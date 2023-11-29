@@ -52,8 +52,10 @@ p = ggplot(d_sw, aes(x = ppt, y = dist_sw, color = day_of_burning, shape = fire)
   scale_color_viridis_c(na.value = NA, breaks = c(182, 196, 213, 227, 244, 258), labels = c("01-Jul", "15-Jul", "01-Aug","15-Aug", "01-Sep", "15-Sep"), name = "Day of burning") +
   labs(x = "Mean annual precipitation (mm)", y = "Distance to edge (m)")
 
+png()
+dev.off()
 png(file.path(datadir, "figures/supp_dist_ppt.png"), res = 200, width = 1500, height = 1100)
-p
+print(p)
 dev.off()
 
 
@@ -66,20 +68,16 @@ p = ggplot(d_sw, aes(x = day_of_burning, y = dist_sw, color = fire, shape = fire
   scale_x_continuous(breaks = c(182, 196, 213, 227, 244, 258), labels = c("01-Jul", "15-Jul", "01-Aug","15-Aug", "01-Sep", "15-Sep"), name = "Date of burning") +
   labs(y = "Distance to edge (m)")
 
+png()
+dev.off()
 png(file.path(datadir, "figures/supp_dist_dob.png"), res = 200, width = 1500, height = 1100)
-p
+print(p)
 dev.off()  
 
 
 # Plot raw data for all species. This function saves to figure files.
 d_sp = prep_d_sp("ALL")
 plot_raw_data(d_sp, axis_label = bquote(Conifer~seedlings~m^-2), plot_title = NULL, filename = "all")
-
-
-# Alternate version
-plot_raw_seedl_dens(d_sp, axis_label = bquote(Conifer~seedlings~m^-2), plot_title = NULL, filename = "plot_raw_seedl_dens")
-
-
 
 
 
@@ -93,8 +91,8 @@ d_mod_all_core = prep_d_core_mod(d_sp) |>
   mutate(seedl_dens_sp = round(seedl_dens_sp * 314)) |>
   mutate(species = "All conifers", type = "Interior")
 
-m = gam(seedl_dens_sp ~ s(fire_intens, k = 3) + s(ppt, k = 3) , data = d_mod_all_core, family = poisson, method = "REML") # full model
-m_nointens = gam(seedl_dens_sp ~ s(ppt, k = 3), data = d_mod_all_core, family = poisson, method = "REML") # model without fire intensity, for understanding how much that predictor matters
+m = gam(seedl_dens_sp ~ s(fire_intens, k = 3) + s(ppt, k = 3) , data = d_mod_all_core, family = nb, method = "REML") # full model
+m_nointens = gam(seedl_dens_sp ~ s(ppt, k = 3), data = d_mod_all_core, family = nb, method = "REML") # model without fire intensity, for understanding how much that predictor matters
 all_core_intens_dev_exp = (100 *(m$null.deviance - m$deviance) / m$null.deviance) |> round(1) # deviance explained for full model
 all_core_nointens_dev_exp = (100 *(m_nointens$null.deviance - m_nointens$deviance) / m_nointens$null.deviance) |> round(1) # deviance explained for reduced model
 sum(influence(m)) # model effective degrees of freedom
@@ -111,8 +109,8 @@ d_mod_pines_core = prep_d_core_mod(d_sp) |>
   mutate(species = "Pines", type = "Interior")
 # Plot raw data
 # Fit GAM
-m = gam(seedl_dens_sp ~ s(fire_intens, k = 3) + s(ppt, k = 3) + s(prefire_prop_sp, k = 3), data = d_mod_pines_core, family = poisson, method = "REML")
-m_nointens = gam(seedl_dens_sp ~ s(ppt, k = 3) + s(prefire_prop_sp, k = 3), data = d_mod_pines_core, family = poisson, method = "REML")
+m = gam(seedl_dens_sp ~ s(fire_intens, k = 3) + s(ppt, k = 3) + s(prefire_prop_sp, k = 3), data = d_mod_pines_core, family = nb, method = "REML")
+m_nointens = gam(seedl_dens_sp ~ s(ppt, k = 3) + s(prefire_prop_sp, k = 3), data = d_mod_pines_core, family = nb, method = "REML")
 pines_core_intens_dev_exp = (100 *(m$null.deviance - m$deviance) / m$null.deviance) |> round(1)
 pines_core_nointens_dev_exp = (100 *(m_nointens$null.deviance - m_nointens$deviance) / m_nointens$null.deviance) |> round(1)
 sum(influence(m))
@@ -127,8 +125,8 @@ d_sp = prep_d_sp("ALL")
 d_mod_all_sw = prep_d_sw_mod(d_sp, max_sw_dist = 30) |>
   mutate(seedl_dens_sp = round(seedl_dens_sp * 314)) |>
   mutate(species = "All conifers", type = "Edge")
-m = gam(seedl_dens_sp ~ + s(ppt, k = 3) + s(fire_intens, k = 3), data = d_mod_all_sw, family = poisson)
-m_nointens = gam(seedl_dens_sp ~ + s(ppt, k = 3), data = d_mod_all_sw, family = poisson)
+m = gam(seedl_dens_sp ~ + s(ppt, k = 3) + s(fire_intens, k = 3), data = d_mod_all_sw, family = nb, method = "REML")
+m_nointens = gam(seedl_dens_sp ~ + s(ppt, k = 3), data = d_mod_all_sw, family = nb, method = "REML")
 all_sw_intens_dev_exp = (100 *(m$null.deviance - m$deviance) / m$null.deviance) |> round(1)
 all_sw_nointens_dev_exp = (100 *(m_nointens$null.deviance - m_nointens$deviance) / m_nointens$null.deviance) |> round(1)
 sum(influence(m))
@@ -142,8 +140,8 @@ d_sp = prep_d_sp("PINES")
 d_mod_pines_sw = prep_d_sw_mod(d_sp, max_sw_dist = 30) |>
   mutate(seedl_dens_sp = round(seedl_dens_sp * 314)) |>
   mutate(species = "Pines", type = "Edge")
-m = gam(seedl_dens_sp ~ s(ppt, k = 3) + s(fire_intens, k = 3) + s(grn_vol_sp, k = 3), data = d_mod_pines_sw, family = poisson)
-m_nointens = gam(seedl_dens_sp ~ s(ppt, k = 3) + s(grn_vol_sp, k = 3), data = d_mod_pines_sw, family = poisson)
+m = gam(seedl_dens_sp ~ s(ppt, k = 3) + s(fire_intens, k = 3) + s(grn_vol_sp, k = 3), data = d_mod_pines_sw, family = nb, method = "REML")
+m_nointens = gam(seedl_dens_sp ~ s(ppt, k = 3) + s(grn_vol_sp, k = 3), data = d_mod_pines_sw, family = nb, method = "REML")
 pines_sw_intens_dev_exp = (100 *(m$null.deviance - m$deviance) / m$null.deviance) |> round(1)
 pines_sw_nointens_dev_exp = (100 *(m_nointens$null.deviance - m_nointens$deviance) / m_nointens$null.deviance) |> round(1)
 sum(influence(m))
@@ -171,8 +169,10 @@ p2 = make_scenario_ggplot(scenario_preds, d_mods, "ppt", "Mean annual precipitat
 
 p = ggarrange(p1, p2 + rremove("ylab") + rremove("y.text"), common.legend = TRUE, widths = c(1.2,1))
 
+png()
+dev.off()
 png(file.path(datadir, "figures/main_model_fits.png"), res = 350, width = 2000, height = 1100)
-p
+print(p)
 dev.off()
 
 # Save figure with torching panel only
@@ -185,8 +185,10 @@ p1a = p1 +
   )
 p1a
 
+png()
+dev.off()
 png(file.path(datadir, "figures/main_model_fits_torching-only.png"), res = 700, width = 2800, height = 2400)
-p1a
+print(p1a)
 dev.off()
 
 # Save figure with ppt panel only
@@ -194,8 +196,10 @@ dev.off()
 p2a = p2
 p2a
 
+png()
+dev.off()
 png(file.path(datadir, "figures/main_model_fits_ppt-only.png"), res = 700, width = 3600, height = 2400)
-p2a
+print(p2a)
 dev.off()
 
 #### Make a table of deviance explained 
@@ -226,13 +230,15 @@ d_mod_all_core = prep_d_core_mod(d_sp) |>
          cone_dens_sp = cone_dens_sp * 314) |>
   mutate(species = "All conifers", type = "Interior")
 
-m = gam(seedl_dens_sp ~ s(fire_intens, k = 3) + s(ppt, k = 3) , data = d_mod_all_core, family = poisson, method = "REML")
+m = gam(seedl_dens_sp ~ s(fire_intens, k = 3) + s(ppt, k = 3) , data = d_mod_all_core, family = nb, method = "REML")
 ppt_split = 1200 # split between low and high precip
 scenario_preds = get_scenario_preds(m, d_mod_all_core, "fire_intens", sp = "All conifers", percentile_exclude = percentile_exclude, interacting_predictor = "ppt", interacting_splits = ppt_split) |> mutate(type = "Interior")
 p1 = make_scenario_w_ppt_ggplot(scenario_preds, d_mod_all_core, "fire_intens", "Canopy burn fraction (%)", ymin = NULL, ymax = NULL, interacting_splits = ppt_split, show_data = TRUE)
 
+png()
+dev.off()
 png(file.path(datadir, "figures/fits_w_data.png"), res = 700, width = 2800, height = 2400)
-p1
+print(p1)
 dev.off()
 
 
@@ -272,15 +278,32 @@ d_fig |>
   group_by(under_cones_new_sp) |>
   summarize(seedl_dens = median(seedl_dens_sp))
 
+
+d_summ_cone_dens = d_fig |>
+  group_by(cone_dens_sp_cat) |>
+  summarize(median = median(seedl_dens_sp),
+            lwr = quantile(seedl_dens_sp, 0.25),
+            upr = quantile(seedl_dens_sp, 0.75))
+  
+d_summ_under_cones_new = d_fig |>
+  group_by(under_cones_new_sp) |>
+  summarize(median = median(seedl_dens_sp),
+            lwr = quantile(seedl_dens_sp, 0.25),
+            upr = quantile(seedl_dens_sp, 0.75))
+
+
 # Set up plotting parameters
 color_breaks = c(0.0005, 0.001, 0.01, 0.1, 1, 10, 100)
 color_labels = c("[0]", "0.001", "0.01", "0.1", "1", "10", "100")
 
 p1 = ggplot(d_fig, aes(x = cone_dens_sp_cat, y = seedl_dens_sp, color = cone_dens_sp)) +
-  geom_jitter(height = 0, width = 0.15) +
+  geom_linerange(data = d_summ_cone_dens, aes(ymin = lwr, ymax = upr, y = NULL), size = 1.2, position = position_nudge(x = +0.15), color = "black") +
+  geom_jitter(alpha = 1, size = 1.5, aes(x = as.numeric(cone_dens_sp_cat) - 0.15), position = position_jitter(width = 0.1, height = 0)) +
+  geom_point(data = d_summ_cone_dens, size = 4, aes(x = cone_dens_sp_cat, y = median), position = position_nudge(x = +0.15), shape = 18, color = "black") +
+  # geom_jitter(height = 0, width = 0.15) +
   scale_color_viridis_c(trans = "log", name = bquote(Cones~m^-2), breaks = color_breaks, labels = color_labels, oob = squish) +
   coord_trans(y = "log") +
-  geom_boxplot(data = d_fig, coef = 0, outlier.shape = NA, fill = NA, width = 0.4) +
+  #geom_boxplot(data = d_fig, coef = 0, outlier.shape = NA, fill = NA, width = 0.4) +
   scale_y_continuous(breaks = c(0.0005, .001,.01,.1,1,10,100, 1000), minor_breaks = c(0.005, 0.05, 0.5, 5.0, 50, 500), labels = c("[0]", "0.001", "0.01", "0.1", "1", "10", "100", "1000")) +
   labs(x = "Plot cone\ndensity", y = bquote(Yellow~pine~seedlings~m^-2)) +
   theme_bw() +
@@ -288,9 +311,12 @@ p1 = ggplot(d_fig, aes(x = cone_dens_sp_cat, y = seedl_dens_sp, color = cone_den
 p1
 
 p2 = ggplot(d_fig, aes(x = under_cones_new_sp, y = seedl_dens_sp)) +
-  geom_jitter(height = 0, width = 0.15, color = "gray60") +
+  geom_linerange(data = d_summ_under_cones_new, aes(ymin = lwr, ymax = upr, y = NULL), size = 1.2, position = position_nudge(x = +0.15), color = "black") +
+  geom_jitter(alpha = 1, size = 1.5, aes(x = as.numeric(under_cones_new_sp) - 0.15), position = position_jitter(width = 0.1, height = 0), , color = "gray60") +
+  geom_point(data = d_summ_under_cones_new, size = 4, aes(x = under_cones_new_sp, y = median), position = position_nudge(x = +0.15), shape = 18, color = "black") +
+  # geom_jitter(height = 0, width = 0.15, color = "gray60") +
   coord_trans(y = "log") +
-  geom_boxplot(data = d_fig, coef = 0, outlier.shape = NA, fill = NA, width = 0.4) +
+  # geom_boxplot(data = d_fig, coef = 0, outlier.shape = NA, fill = NA, width = 0.4) +
   scale_y_continuous(breaks = c(0.0005, .001,.01,.1,1,10,100, 1000), minor_breaks = c(0.005, 0.05, 0.5, 5.0, 50, 500), labels = c("[0]", "0.001", "0.01", "0.1", "1", "10", "100", "1000")) +
   labs(x = "Single-tree cone\ndensity", y = bquote(Yellow~pine~seedlings~m^-2)) +
   theme_bw() +
@@ -298,6 +324,8 @@ p2 = ggplot(d_fig, aes(x = under_cones_new_sp, y = seedl_dens_sp)) +
 
 p = ggarrange(p2, p1 + rremove("ylab") + rremove("y.text"), widths = c(1,1.25))
 
+png()
+dev.off()
 png(file.path(datadir, "figures/cone_dens_boxplots.png"), res = 800, width = 3600, height = 2800)
-p
+print(p)
 dev.off()

@@ -3,6 +3,12 @@
 library(tidyverse)
 library(here)
 
+## Constants
+
+# Minimum distance (m) from an interior plot to a green tree (sight line must also go that far)
+minimum_dist_green = 60
+
+
 # The root of the data directory
 datadir = readLines(here("data_dir.txt"), n=1)
 
@@ -14,10 +20,10 @@ d = read_csv(file.path(datadir,"plot-data-prepped.csv"))
 # Prep the plots used for the "all species" analyses
 d_sp = prep_d_sp("ALL")
 
-### Overall seedling densities, and count of scorched/torched plots
+### In interior plots: overall seedling densities, and count of scorched/torched plots
 d_sp |>
   filter(grn_vol_abs_sp == 0,
-         ((is.na(dist_grn_sp) | dist_grn_sp > 100) & sight_line > 100),
+         ((is.na(dist_grn_sp) | dist_grn_sp > minimum_dist_green) & sight_line > minimum_dist_green),
          plot_type %in% c("core", "delayed")) |>
   mutate(intens_cat = ifelse(fire_intens > 85, "torched", "scorched")) |>
   summarize(dens_mean = mean(seedl_dens_sp),
@@ -29,7 +35,7 @@ d_sp |>
 ## Specifically early-burn plots
 d_sp |>
   filter(grn_vol_abs_sp == 0,
-         ((is.na(dist_grn_sp) | dist_grn_sp > 100) & sight_line > 100),
+         ((is.na(dist_grn_sp) | dist_grn_sp > minimum_dist_green) & sight_line > minimum_dist_green),
          plot_type %in% c("core", "delayed"),
          day_of_burning <= 210) |>
   summarize(dens_mean = mean(seedl_dens_sp),
@@ -50,11 +56,11 @@ d_sp |>
 
 
 
-### Species proportions in low vs high torch plots
+### Species proportions in later-burned low vs high torch plots
 # for low intensity plots
 d_spcomp =  d_sp |>
   filter(grn_vol_abs_sp == 0,
-         ((is.na(dist_grn_sp) | dist_grn_sp > 100) & sight_line > 100),
+         ((is.na(dist_grn_sp) | dist_grn_sp > minimum_dist_green) & sight_line > minimum_dist_green),
          day_of_burning > 210,
          between(fire_intens, 0, 50),
          plot_type %in% c("core", "delayed")) |>
@@ -74,7 +80,7 @@ d_spcomp_lowintens
 # for high intensity plots
 d_spcomp =  d_sp |>
   filter(grn_vol_abs_sp == 0,
-         ((is.na(dist_grn_sp) | dist_grn_sp > 100) & sight_line > 100),
+         ((is.na(dist_grn_sp) | dist_grn_sp > minimum_dist_green) & sight_line > minimum_dist_green),
          day_of_burning > 210,
          between(fire_intens, 80, 100),
          plot_type %in% c("core", "delayed")) |>
@@ -100,13 +106,13 @@ d_spcomp_intens
 
 
 
-### proportions by species of seedlings
+### proportions by species of seedlings (any canopy burn fraction)
 # exclude the early burn plots, compute by median
 
 # for core area plots
 d_spcomp =  d_sp |>
   filter(grn_vol_abs_sp == 0,
-         ((is.na(dist_grn_sp) | dist_grn_sp > 100) & sight_line > 100),
+         ((is.na(dist_grn_sp) | dist_grn_sp > minimum_dist_green) & sight_line > minimum_dist_green),
          day_of_burning > 210,
          plot_type %in% c("core", "delayed")) |>
   summarize(across(c(seedl_dens_ABIES,seedl_dens_CADE,seedl_dens_PILA,seedl_dens_PSME,seedl_dens_PICO,seedl_dens_YLWPINES), median))
@@ -136,14 +142,14 @@ d_spcomp_sw
 # combine and write
 spcomp = bind_rows(d_spcomp_core, d_spcomp_sw)
 spcomp
-write_csv(spcomp, file.path(datadir, "tables/regen_species_comp.csv"))
+#write_csv(spcomp, file.path(datadir, "tables/regen_species_comp.csv"))
 
 
 
 ### Get mean pre-fire overstory species comp across all core plots burning in Aug or later
 d_ovrspcomp = d_sp |>
   filter(grn_vol_abs_sp == 0,
-         ((is.na(dist_grn_sp) | dist_grn_sp > 100) & sight_line > 100),
+         ((is.na(dist_grn_sp) | dist_grn_sp > minimum_dist_green) & sight_line > minimum_dist_green),
          day_of_burning > 210,
          plot_type %in% c("core", "delayed")) |>
   summarize(across(starts_with("prefire_prop_"), mean)) |>
@@ -155,8 +161,65 @@ d_ovrspcomp
 ### Get max seedling density by species
 d_max_seedl_dens =  d_sp |>
   filter(grn_vol_abs_sp == 0,
-         ((is.na(dist_grn_sp) | dist_grn_sp > 100) & sight_line > 100),
+         ((is.na(dist_grn_sp) | dist_grn_sp > minimum_dist_green) & sight_line > minimum_dist_green),
          plot_type %in% c("core", "delayed")) |>
   summarize(across(starts_with("seedl_dens_"), max))
 d_max_seedl_dens
 
+
+
+
+### Interior plot vs edge plot seedling density for early burned, late burned, mid-burned (for Table S1)
+
+# get the interior, low canopy burn plots to consider
+d_int = d_sp |>
+  filter(grn_vol_abs_sp == 0,
+         ((is.na(dist_grn_sp) | dist_grn_sp > minimum_dist_green) & sight_line > minimum_dist_green),
+         plot_type %in% c("core", "delayed"),
+         fire_intens < 85) |>
+  select(seedl_dens_sp, day_of_burning) |>
+  mutate(plot_type_simp = "interior")
+  
+# get the edge plots to consider
+d_edge = d_sp |>
+  filter(plot_type == "seedwall") |>
+  filter(dist_sw <= 60) |>
+  select(seedl_dens_sp, day_of_burning, dist_grn_sp) |>
+  mutate(plot_type_simp = "edge")
+
+d_pre = bind_rows(d_int, d_edge)
+
+# First early burned
+d_relative_dens_early = d_pre |>
+  filter(day_of_burning < 210) |>
+  group_by(plot_type_simp) |>
+  summarize(median_dens_early = median(seedl_dens_sp),
+            n_early = n(),
+            median_dist_grn_early = median(dist_grn_sp))
+
+# Mid burned
+d_relative_dens_mid = d_pre |>
+  filter(between(day_of_burning, 219, 219+11)) |>
+  group_by(plot_type_simp) |>
+  summarize(median_dens_mid = median(seedl_dens_sp),
+            n_mid = n(),
+            median_dist_grn_mid = median(dist_grn_sp))
+ 
+# Late burned
+d_relative_dens_late = d_pre |>
+  filter(day_of_burning > 210) |>
+  group_by(plot_type_simp) |>
+  summarize(median_dens_late = median(seedl_dens_sp),
+            n_late = n(),
+            median_dist_grn_late = median(dist_grn_sp))
+
+d_rel_dens = d_relative_dens_early |>
+  left_join(d_relative_dens_late) |>
+  left_join(d_relative_dens_mid)
+
+d_rel_dens_rel = (d_rel_dens |> filter(plot_type_simp == "interior") |> select(-plot_type_simp, -n_early, -n_mid, -n_late)) /
+  (d_rel_dens |> filter(plot_type_simp == "edge") |> select(-plot_type_simp, -n_early, -n_mid, -n_late)) *
+  100
+d_rel_dens_rel
+
+d_rel_dens |> select(plot_type_simp, n_early, n_late, n_mid, median_dist_grn_early, median_dist_grn_late, median_dist_grn_mid)
