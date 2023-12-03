@@ -351,6 +351,35 @@ make_scenario_ggplot = function(scenario_preds, d_mod, focal_predictor, predicto
 
 }
 
+# Plot GAM predictions along an axis of one predictor (i.e., torching extent)
+make_scenario_ggplot_allsponly = function(scenario_preds, d_mod, focal_predictor, predictor_label, ymin, ymax) {
+  
+  # Prep data frame for plotting
+  d_mod = d_mod |>
+    mutate(type = as.factor(type))
+    
+  d_fig = scenario_preds |> filter(predictor_foc == focal_predictor) |>
+    mutate(type = factor(type, levels = c("Edge", "Interior"))) |>
+    filter(species == "All conifers")
+    
+  p = ggplot(data = d_fig, mapping = aes(x = !!ensym(focal_predictor), y = preds, color = type, fill = type)) +
+    geom_line() +
+    geom_ribbon(aes(ymin = preds_lwr, ymax = preds_upr, fill=type), color=NA, alpha = .3, show.legend = FALSE) +
+    # scale_linetype(name = "Taxon", limits = c("All conifers", "Pines")) +
+    scale_color_manual(values = c("Edge" = "#A2D435", "Interior" = "#b06d1b")) +
+    scale_fill_manual(values = c("Edge" = "#A2D435", "Interior" = "#b06d1b")) +
+
+    scale_y_continuous(breaks = c(.001,.01,.1,1,10,100, 1000), minor_breaks = c(0.0005,0.005, 0.05, 0.5, 5.0, 50, 500), labels = label_comma(), limits = c(0.1, 30)) +
+    coord_cartesian(ylim = c(ymin, ymax)) +
+    coord_trans(y = "log") +
+    theme_bw() +
+    labs(y = bquote(Seedlings~m^-2), x = predictor_label)
+  
+  return(p)
+
+}
+
+
 # Plot GAM predictions along an axis of one predictor (i.e., torching extent), interacting with precip (2 levels, split as specified by 'interacting_splits')
 make_scenario_w_ppt_ggplot = function(scenario_preds, d_mod, focal_predictor, predictor_label, ymin, ymax, interacting_splits = NA, show_data = FALSE) {
 

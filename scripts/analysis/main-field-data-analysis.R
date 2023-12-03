@@ -202,6 +202,22 @@ png(file.path(datadir, "figures/main_model_fits_ppt-only.png"), res = 700, width
 print(p2a)
 dev.off()
 
+
+
+
+### Repeat for a figure with 'all species' only
+p1 = make_scenario_ggplot_allsponly(scenario_preds, d_mods, "fire_intens", "Canopy burn fraction (%)", ymin = ymin, ymax = ymax)
+p1
+
+png(file.path(datadir, "figures/main_model_fits_torching-only_allsp-only.png"), res = 700, width = 2800*1.2, height = 2400)
+print(p1)
+dev.off()
+
+
+
+
+
+
 #### Make a table of deviance explained 
 
 dev = data.frame(species = c("All conifers - core", "Pines - core", "All conifers - SW", "Pines - SW"),
