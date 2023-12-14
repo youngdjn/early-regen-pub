@@ -61,5 +61,3 @@ d_summ_large = d |>
   group_by(dist_bins) |>
   summarize(median_dens = median(dens_all),
             mean_dens = mean(dens_all))
-
-

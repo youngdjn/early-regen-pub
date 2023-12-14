@@ -1,7 +1,7 @@
 # Functions that support analysis in the main analysis workflow script
 
 ## Take the full raw data frame with one row per plot and prepare it for analysis focused on a specific species or species group.
-# Mostly, for the species-specific questions (or species group-specific questions), prepare a series of columns ending in _sp that have the data summarized specifically for that species.
+# Primarily, for the species-specific questions (or species group-specific questions), prepare a series of columns ending in _sp that have the data summarized specifically for that species.
 # Also removes seed wall plots with < 20% species comp in the seed wall of the focal species, removes core area plots with < 20% pre-fire overstory species comp of the focal species, removes seed wall plots with > 20% green canopy remaining within 10m
 prep_d_sp = function(sp) {
   
@@ -43,7 +43,10 @@ prep_d_sp = function(sp) {
 }
 
 
-#### Plot raw seedling density data vs day of burning scatterplot
+#### Plot raw seedling density observations, primarily:
+# seedling density data vs day of burning scatterplot, with points colored by plot type, and
+# an alternative version that classifies plots as early/late edge/interior_low/interior_high, as
+# opposed to plotting along a timeline of day of burning
 
 plot_raw_data = function(d_sp, axis_label, plot_title, filename) {
   
@@ -98,8 +101,6 @@ plot_raw_data = function(d_sp, axis_label, plot_title, filename) {
     scale_color_viridis_d(name = "Fire", begin = 0.2, end = 0.8) +
     labs(x = "Date of burning", y = "Mean annual precipitation (mm)")
   
-  png()
-  dev.off()
   png(file.path(datadir, paste0("figures/supp_ppt_dob_", filename, ".png")), res = 200, width = 1500, height = 1100)
   print(p)
   dev.off()  
@@ -172,8 +173,6 @@ plot_raw_data = function(d_sp, axis_label, plot_title, filename) {
     geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = core_blk_median, yend = core_blk_median), linewidth = 1.5, color = "black") +
     geom_segment(data = windows_foc,aes(x = start-2, xend = end+2, y = core_brn_median, yend = core_brn_median), linewidth = 1.5, color = "#b06d1b")
 
-  png()
-  dev.off()
   png(file.path(datadir, paste0("figures/raw_data_", filename, ".png")), res = 350*2, width = 4500*2, height = 2400*2)
   print(p)
   dev.off()
@@ -206,13 +205,11 @@ plot_raw_data = function(d_sp, axis_label, plot_title, filename) {
               lwr = quantile(seedl_dens_sp, 0.25),
               upr = quantile(seedl_dens_sp, 0.75))
   
-  ### Make figure: for each plot type X burn date:
+  ### Make figure: for each plot type * burn date:
   p = ggplot(d_fig, aes(x = burn_date_cat, y = seedl_dens_sp, color = plot_type)) +
     geom_hline(yintercept = 0.0173, linetype = "dashed", color="gray70") +
     geom_linerange(data = d_summ, aes(ymin = lwr, ymax = upr, y = NULL), size = 2, position = position_nudge(x = +0.15)) +
     geom_jitter(alpha = 1, size = 2.5, aes(x = as.numeric(burn_date_cat) - 0.15), position = position_jitter(width = 0.1, height = 0)) +
-    # geom_weave(position = position_nudge(x = -0.1)) +
-    #geom_segment(data = d_summ, size = 1.2, aes(x = as.numeric(burn_date_cat) - 0.07, xend = as.numeric(burn_date_cat) + 0.07, y = median, yend = median), position = position_nudge(x = +0.15)) +
     geom_point(data = d_summ, size = 6, aes(x = burn_date_cat, y = median), position = position_nudge(x = +0.15), shape = 18) +
     facet_wrap(~plot_type) +
     scale_y_continuous(breaks = c(0.0005, .001,.01,.1,1,10,100), minor_breaks = c(0.005, 0.05, 0.5, 5.0, 50), labels = c("[0]", "0.001","0.01", "0.1", "1", "10","100")) +
@@ -225,8 +222,6 @@ plot_raw_data = function(d_sp, axis_label, plot_title, filename) {
     theme(strip.background = element_rect(fill = "white"),
           panel.grid.major.x = element_blank(), panel.grid.minor.x = element_blank())
 
-  png()
-  dev.off()
   png(file.path(datadir, paste0("figures/raw_seedl_dens_full_", filename, ".png")), res = 350*4, width = 2600*4, height = 1800*4)
   print(p)
   dev.off()
@@ -244,7 +239,6 @@ prep_d_core_mod = function(d_sp) {
   
   return(d_mod)
 }
-
 
 # Prep seedwall data for modeling: filter to seed wall plots within a specified distance of seed wall
 prep_d_sw_mod = function(d_sp, max_sw_dist) {
@@ -351,7 +345,7 @@ make_scenario_ggplot = function(scenario_preds, d_mod, focal_predictor, predicto
 
 }
 
-# Plot GAM predictions along an axis of one predictor (i.e., torching extent)
+# Replicate of the above function, but plot only the "all species" predictions (for a presentation figure)
 make_scenario_ggplot_allsponly = function(scenario_preds, d_mod, focal_predictor, predictor_label, ymin, ymax) {
   
   # Prep data frame for plotting

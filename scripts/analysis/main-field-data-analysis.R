@@ -1,4 +1,4 @@
-# Performs the main analyses of seedling density and its drivers, including GAM modeling and figure plotting
+# Performs the main analyses of seedling density and its drivers, including GAM modeling and data vis
 
 library(tidyverse)
 library(mgcv)
@@ -52,8 +52,6 @@ p = ggplot(d_sw, aes(x = ppt, y = dist_sw, color = day_of_burning, shape = fire)
   scale_color_viridis_c(na.value = NA, breaks = c(182, 196, 213, 227, 244, 258), labels = c("01-Jul", "15-Jul", "01-Aug","15-Aug", "01-Sep", "15-Sep"), name = "Day of burning") +
   labs(x = "Mean annual precipitation (mm)", y = "Distance to edge (m)")
 
-png()
-dev.off()
 png(file.path(datadir, "figures/supp_dist_ppt.png"), res = 200, width = 1500, height = 1100)
 print(p)
 dev.off()
@@ -68,8 +66,6 @@ p = ggplot(d_sw, aes(x = day_of_burning, y = dist_sw, color = fire, shape = fire
   scale_x_continuous(breaks = c(182, 196, 213, 227, 244, 258), labels = c("01-Jul", "15-Jul", "01-Aug","15-Aug", "01-Sep", "15-Sep"), name = "Date of burning") +
   labs(y = "Distance to edge (m)")
 
-png()
-dev.off()
 png(file.path(datadir, "figures/supp_dist_dob.png"), res = 200, width = 1500, height = 1100)
 print(p)
 dev.off()  
@@ -169,8 +165,6 @@ p2 = make_scenario_ggplot(scenario_preds, d_mods, "ppt", "Mean annual precipitat
 
 p = ggarrange(p1, p2 + rremove("ylab") + rremove("y.text"), common.legend = TRUE, widths = c(1.2,1))
 
-png()
-dev.off()
 png(file.path(datadir, "figures/main_model_fits.png"), res = 350, width = 2000, height = 1100)
 print(p)
 dev.off()
@@ -185,8 +179,6 @@ p1a = p1 +
   )
 p1a
 
-png()
-dev.off()
 png(file.path(datadir, "figures/main_model_fits_torching-only.png"), res = 700, width = 2800, height = 2400)
 print(p1a)
 dev.off()
@@ -203,8 +195,6 @@ print(p2a)
 dev.off()
 
 
-
-
 ### Repeat for a figure with 'all species' only
 p1 = make_scenario_ggplot_allsponly(scenario_preds, d_mods, "fire_intens", "Canopy burn fraction (%)", ymin = ymin, ymax = ymax)
 p1
@@ -212,9 +202,6 @@ p1
 png(file.path(datadir, "figures/main_model_fits_torching-only_allsp-only.png"), res = 700, width = 2800*1.2, height = 2400)
 print(p1)
 dev.off()
-
-
-
 
 
 
@@ -251,8 +238,6 @@ ppt_split = 1200 # split between low and high precip
 scenario_preds = get_scenario_preds(m, d_mod_all_core, "fire_intens", sp = "All conifers", percentile_exclude = percentile_exclude, interacting_predictor = "ppt", interacting_splits = ppt_split) |> mutate(type = "Interior")
 p1 = make_scenario_w_ppt_ggplot(scenario_preds, d_mod_all_core, "fire_intens", "Canopy burn fraction (%)", ymin = NULL, ymax = NULL, interacting_splits = ppt_split, show_data = TRUE)
 
-png()
-dev.off()
 png(file.path(datadir, "figures/fits_w_data.png"), res = 700, width = 2800, height = 2400)
 print(p1)
 dev.off()
@@ -316,10 +301,8 @@ p1 = ggplot(d_fig, aes(x = cone_dens_sp_cat, y = seedl_dens_sp, color = cone_den
   geom_linerange(data = d_summ_cone_dens, aes(ymin = lwr, ymax = upr, y = NULL), size = 1.2, position = position_nudge(x = +0.15), color = "black") +
   geom_jitter(alpha = 1, size = 1.5, aes(x = as.numeric(cone_dens_sp_cat) - 0.15), position = position_jitter(width = 0.1, height = 0)) +
   geom_point(data = d_summ_cone_dens, size = 4, aes(x = cone_dens_sp_cat, y = median), position = position_nudge(x = +0.15), shape = 18, color = "black") +
-  # geom_jitter(height = 0, width = 0.15) +
   scale_color_viridis_c(trans = "log", name = bquote(Cones~m^-2), breaks = color_breaks, labels = color_labels, oob = squish) +
   coord_trans(y = "log") +
-  #geom_boxplot(data = d_fig, coef = 0, outlier.shape = NA, fill = NA, width = 0.4) +
   scale_y_continuous(breaks = c(0.0005, .001,.01,.1,1,10,100, 1000), minor_breaks = c(0.005, 0.05, 0.5, 5.0, 50, 500), labels = c("[0]", "0.001", "0.01", "0.1", "1", "10", "100", "1000")) +
   labs(x = "Plot cone\ndensity", y = bquote(Yellow~pine~seedlings~m^-2)) +
   theme_bw() +
@@ -330,9 +313,7 @@ p2 = ggplot(d_fig, aes(x = under_cones_new_sp, y = seedl_dens_sp)) +
   geom_linerange(data = d_summ_under_cones_new, aes(ymin = lwr, ymax = upr, y = NULL), size = 1.2, position = position_nudge(x = +0.15), color = "black") +
   geom_jitter(alpha = 1, size = 1.5, aes(x = as.numeric(under_cones_new_sp) - 0.15), position = position_jitter(width = 0.1, height = 0), , color = "gray60") +
   geom_point(data = d_summ_under_cones_new, size = 4, aes(x = under_cones_new_sp, y = median), position = position_nudge(x = +0.15), shape = 18, color = "black") +
-  # geom_jitter(height = 0, width = 0.15, color = "gray60") +
   coord_trans(y = "log") +
-  # geom_boxplot(data = d_fig, coef = 0, outlier.shape = NA, fill = NA, width = 0.4) +
   scale_y_continuous(breaks = c(0.0005, .001,.01,.1,1,10,100, 1000), minor_breaks = c(0.005, 0.05, 0.5, 5.0, 50, 500), labels = c("[0]", "0.001", "0.01", "0.1", "1", "10", "100", "1000")) +
   labs(x = "Single-tree cone\ndensity", y = bquote(Yellow~pine~seedlings~m^-2)) +
   theme_bw() +
@@ -340,8 +321,6 @@ p2 = ggplot(d_fig, aes(x = under_cones_new_sp, y = seedl_dens_sp)) +
 
 p = ggarrange(p2, p1 + rremove("ylab") + rremove("y.text"), widths = c(1,1.25))
 
-png()
-dev.off()
 png(file.path(datadir, "figures/cone_dens_boxplots.png"), res = 800, width = 3600, height = 2800)
 print(p)
 dev.off()

@@ -142,7 +142,7 @@ d_spcomp_sw
 # combine and write
 spcomp = bind_rows(d_spcomp_core, d_spcomp_sw)
 spcomp
-#write_csv(spcomp, file.path(datadir, "tables/regen_species_comp.csv"))
+write_csv(spcomp, file.path(datadir, "tables/regen_species_comp.csv"))
 
 
 
