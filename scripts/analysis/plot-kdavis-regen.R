@@ -43,7 +43,7 @@ p = ggplot(d, aes(x = distance_seed_source, y = dens_all_nozero, color = plot_si
   scale_color_viridis_d(begin=.2, end = .8, name = "Plot size")
 p
 
-png(file.path(datadir, "figures/kdavis-seedl-dens.png"), res = 300, width = 1600, height = 1000)
+png(file.path(datadir, "figures/kdavis-seedl-dens.png"), res = 300, width = 1.3*1600, height = 1.5*1000)
 p
 dev.off()
 
@@ -61,5 +61,3 @@ d_summ_large = d |>
   group_by(dist_bins) |>
   summarize(median_dens = median(dens_all),
             mean_dens = mean(dens_all))
-
-
