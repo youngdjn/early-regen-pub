@@ -1,6 +1,6 @@
 # early-regen-pub
 
-Analysis of early post-fire forest regeneration dynamics and aerial seedbanking, supporting the paper "Aerial seedbanking as a mechanism for forest resilience to megafires".
+Analysis of early post-fire forest regeneration dynamics and aerial seedbanking, supporting the paper "Aerial seedbanking: an unexpected source of forest resilience to extreme wildfire".
 
 ## Data management for this repository
 
