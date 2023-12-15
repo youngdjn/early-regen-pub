@@ -21,3 +21,5 @@ The terms "fire intensity" and "torching extent" appearing in variables and comm
 **plot-kdavis-regen.R:** Code for filtering and plotting post-fire tree seedling density data from a large compilation of post-fire vegetation plots published by [Davis et al. (2023)](https://www.pnas.org/doi/10.1073/pnas.2208120120).
 
 **burn-seasonality-summary.R:** Code for summarizing the percentage of burned area in California that burned within specific date ranges.
+
+**afe-pres-figs.R:** Code to make figures used for oral presentations.
