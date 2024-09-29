@@ -42,6 +42,16 @@ d_sp |>
             dens_median = median(seedl_dens_sp),
             n = n())
 
+## Specifically later-burned interior plots
+d_sp |>
+  filter(grn_vol_abs_sp == 0,
+         ((is.na(dist_grn_sp) | dist_grn_sp > minimum_dist_green) & sight_line > minimum_dist_green),
+         plot_type %in% c("core", "delayed"),
+         day_of_burning > 210) |>
+  summarize(dens_mean = mean(seedl_dens_sp),
+            dens_median = median(seedl_dens_sp),
+            n = n())
+
 
 ## Seed wall plots burning BEfore 1 Aug
 d_sp |>
