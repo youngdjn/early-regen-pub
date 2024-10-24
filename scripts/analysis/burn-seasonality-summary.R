@@ -17,7 +17,7 @@ d_s = d |>
 ### Proportion of area burning 1 Aug to 15 Sept
 area_state = sum(d_s$area)
 area_window = d_s |>
-  filter(between(month_day, "08-01", "09-15")) |>
+  filter(between(month_day, "08-01", "10-31")) |>
   pull(area) |>
   sum()
 
@@ -33,7 +33,7 @@ d_f = d_s |>
 
 area_state = sum(d_f$area)
 area_window = d_f |>
-  filter(between(month_day, "08-01", "09-15")) |>
+  filter(between(month_day, "08-01", "10-31")) |>
   pull(area) |>
   sum()
 
