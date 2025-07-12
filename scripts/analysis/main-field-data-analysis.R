@@ -14,7 +14,7 @@ datadir = readLines(here("data_dir.txt"), n=1)
 
 
 # Load data
-d = read_csv(file.path(datadir,"plot-data-prepped.csv"))
+d = read_csv(file.path(datadir, "field-data", "processed",  "plot-data-prepped_v2.csv"))
 
 
 
@@ -82,6 +82,7 @@ plot_raw_data(d_sp, axis_label = bquote(Conifer~seedlings~m^-2), plot_title = NU
 ### Core
 ## For ALL species, core
 d_sp = prep_d_sp("ALL")
+
 # Need integer response var (number of seedl at 10 m radius plot scale), and assign tags for which run this is
 d_mod_all_core = prep_d_core_mod(d_sp) |>
   mutate(seedl_dens_sp = round(seedl_dens_sp * 314)) |>
@@ -241,6 +242,15 @@ p1 = make_scenario_w_ppt_ggplot(scenario_preds, d_mod_all_core, "fire_intens", "
 png(file.path(datadir, "figures/fits_w_data.png"), res = 700, width = 2800, height = 2400)
 print(p1)
 dev.off()
+
+
+
+## Get the climate summary of the plots
+plots_for_clim = bind_rows(d_mod_all_core, d_mod_all_sw) |>
+  select(plot_id, fire, ppt_wy2022_4km, ppt_norm_4km, tmean_wy2022_4km, tmean_norm_4km)
+
+
+
 
 
 
