@@ -249,6 +249,11 @@ dev.off()
 plots_for_clim = bind_rows(d_mod_all_core, d_mod_all_sw) |>
   select(plot_id, fire, ppt_wy2022_4km, ppt_norm_4km, tmean_wy2022_4km, tmean_norm_4km)
 
+clim_summ = plots_for_clim |>
+  summarize(ppt_wy2022_4km = mean(ppt_wy2022_4km, na.rm = TRUE),
+            ppt_norm_4km = mean(ppt_norm_4km, na.rm = TRUE),
+            tmean_wy2022_4km = mean(tmean_wy2022_4km, na.rm = TRUE),
+            tmean_norm_4km = mean(tmean_norm_4km, na.rm = TRUE))
 
 
 
