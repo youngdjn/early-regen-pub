@@ -15,7 +15,7 @@ datadir = readLines(here("data_dir.txt"), n=1)
 source("scripts/analysis/main-field-data-analysis_functions.R")
 
 # Load data
-d = read_csv(file.path(datadir,"plot-data-prepped.csv"))
+d = read_csv(file.path(datadir,"field-data/processed/plot-data-prepped_v2.csv"))
 
 # Prep the plots used for the "all species" analyses
 d_sp = prep_d_sp("ALL")
@@ -233,3 +233,69 @@ d_rel_dens_rel = (d_rel_dens |> filter(plot_type_simp == "interior") |> select(-
 d_rel_dens_rel
 
 d_rel_dens |> select(plot_type_simp, n_early, n_late, n_mid, median_dist_grn_early, median_dist_grn_late, median_dist_grn_mid)
+
+
+
+## Make observed data summary table for supp
+
+d_sp
+
+summ_pre = d_sp |>
+  filter(((grn_vol_abs_sp == 0) & (((is.na(dist_grn_sp) | dist_grn_sp > minimum_dist_green) & sight_line > minimum_dist_green)) & (plot_type %in% c("core", "delayed"))) |
+          (plot_type == "seedwall" & dist_sw <= 60)) |>  
+  mutate(burn_date_cat = ifelse(day_of_burning < 210, "Early", "Late")) |>
+  mutate(burn_date_cat = factor(burn_date_cat, levels = c("Early", "Late"))) |>
+  mutate(intens_cat = ifelse(fire_intens > 85, "High", "Low")) |>
+  mutate(intens_cat = factor(intens_cat, levels = c("Low", "High"))) |>
+  mutate(plot_type_cat = ifelse(plot_type == "seedwall", "Edge", "Interior")) |>
+  mutate(plot_type_cat = factor(plot_type_cat, levels = c("Interior", "Edge")))
+
+
+# Burn date is irrelevant for edge plots
+summ_pre[summ_pre$plot_type_cat == "Edge", "burn_date_cat"] = NA
+
+summ_perdate = summ_pre |> 
+  group_by(plot_type_cat, intens_cat, burn_date_cat) |>
+  summarize(plot_count = n(),
+            seedl_dens_pipj = median(seedl_dens_YLWPINES),
+            #seedl_dens_pila = median(seedl_dens_PILA), #zero
+            #seedl_dens_psme = median(seedl_dens_PSME), #zero
+            seedl_dens_abies = median(seedl_dens_ABIES),
+            seedl_dens_cade = median(seedl_dens_CADE),
+            seedl_dens_all = median(seedl_dens_sp),
+            cone_dens_pipj = median(cone_dens_YLWPINES),
+            #cone_dens_pila = median(cone_dens_PILA), #zero
+            cone_dens_psme = median(cone_dens_PSME))
+
+summ_overall = summ_pre |>
+  group_by(plot_type_cat, intens_cat) |>
+  summarize(plot_count = n(),
+            seedl_dens_pipj = median(seedl_dens_YLWPINES),
+            #seedl_dens_pila = median(seedl_dens_PILA), #zero
+            #seedl_dens_psme = median(seedl_dens_PSME), #zero
+            seedl_dens_abies = median(seedl_dens_ABIES),
+            seedl_dens_cade = median(seedl_dens_CADE),
+            seedl_dens_all = median(seedl_dens_sp),
+            cone_dens_pipj = median(cone_dens_YLWPINES),
+            #cone_dens_pila = median(cone_dens_PILA), #zero
+            cone_dens_psme = median(cone_dens_PSME)) |>
+  # Exclude edge plots because we don't need an overall summary for them (not grouping by burn date)
+  filter(plot_type_cat == "Interior") |>
+  mutate(burn_date_cat = "Overall")
+
+# Optionally add overall (across burn dates) summary
+summ = bind_rows(summ_perdate, summ_overall)
+
+# Or alternatively do not include the overall summary
+summ = summ_perdate |>
+  mutate(burn_date_cat = factor(burn_date_cat, levels = c("Early", "Late", "Overall"))) |>
+  arrange(plot_type_cat, intens_cat, burn_date_cat) |>
+  mutate(across(starts_with("seedl_dens_"), ~.*10000)) |>
+  mutate(across(starts_with("cone_dens_"), ~.*10000)) |>
+  mutate(across(starts_with("seedl_dens_"), ~round(., 0))) |>
+  mutate(across(starts_with("cone_dens_"), ~round(., 0)))
+
+summ
+
+# Write CSV
+write_csv(summ, file.path(datadir, "tables/observed_densities.csv"))
