@@ -246,8 +246,6 @@ median_iqr = function(x, mult = 10000) {
   upr = quantile(x, 0.75)
   paste0(round(median, 0), " (", round(lwr, 0), ", ", round(upr, 0), ")")
 }
-  
-  
 
 d_sp
 
@@ -270,6 +268,7 @@ summ_pre[summ_pre$plot_type_cat == "Edge", "burn_date_cat"] = NA
 
 summ_perdate = summ_pre |> 
   group_by(plot_type_cat, intens_cat, burn_date_cat) |>
+  mutate(across(starts_with("under_cones_new_"), ~ifelse(.=="low", 0, 1))) |>
   summarize(plot_count = n(),
             seedl_dens_pipj = median_iqr(seedl_dens_YLWPINES),
             #seedl_dens_pila = median_iqr(seedl_dens_PILA), #zero
@@ -279,23 +278,25 @@ summ_perdate = summ_pre |>
             seedl_dens_all = median_iqr(seedl_dens_sp),
             cone_dens_pipj = median_iqr(cone_dens_YLWPINES),
             #cone_dens_pila = median_iqr(cone_dens_PILA), #zero
-            cone_dens_psme = median_iqr(cone_dens_PSME))
+            cone_dens_psme = median_iqr(cone_dens_PSME),
+            under_cones_new_PIPJ = (mean(under_cones_new_PIPJ) * 100) |> round(0),
+            under_cones_new_PSME = (mean(under_cones_new_PILA) * 100) |> round(0))
 
-summ_overall = summ_pre |>
-  group_by(plot_type_cat, intens_cat) |>
-  summarize(plot_count = n(),
-            seedl_dens_pipj = median(seedl_dens_YLWPINES),
-            #seedl_dens_pila = median(seedl_dens_PILA), #zero
-            #seedl_dens_psme = median(seedl_dens_PSME), #zero
-            seedl_dens_abies = median(seedl_dens_ABIES),
-            seedl_dens_cade = median(seedl_dens_CADE),
-            seedl_dens_all = median(seedl_dens_sp),
-            cone_dens_pipj = median(cone_dens_YLWPINES),
-            #cone_dens_pila = median(cone_dens_PILA), #zero
-            cone_dens_psme = median(cone_dens_PSME)) |>
-  # Exclude edge plots because we don't need an overall summary for them (not grouping by burn date)
-  filter(plot_type_cat == "Interior") |>
-  mutate(burn_date_cat = "Overall")
+# summ_overall = summ_pre |>
+#   group_by(plot_type_cat, intens_cat) |>
+#   summarize(plot_count = n(),
+#             seedl_dens_pipj = median(seedl_dens_YLWPINES),
+#             #seedl_dens_pila = median(seedl_dens_PILA), #zero
+#             #seedl_dens_psme = median(seedl_dens_PSME), #zero
+#             seedl_dens_abies = median(seedl_dens_ABIES),
+#             seedl_dens_cade = median(seedl_dens_CADE),
+#             seedl_dens_all = median(seedl_dens_sp),
+#             cone_dens_pipj = median(cone_dens_YLWPINES),
+#             #cone_dens_pila = median(cone_dens_PILA), #zero
+#             cone_dens_psme = median(cone_dens_PSME)) |>
+#   # Exclude edge plots because we don't need an overall summary for them (not grouping by burn date)
+#   filter(plot_type_cat == "Interior") |>
+#   mutate(burn_date_cat = "Overall")
 
 # Optionally add overall (across burn dates) summary: If do, need to update "median" to "median_iqr"
 #summ = bind_rows(summ_perdate, summ_overall)
@@ -305,11 +306,7 @@ summ = summ_perdate
 
 summ = summ |>
   mutate(burn_date_cat = factor(burn_date_cat, levels = c("Early", "Late", "Overall"))) |>
-  arrange(plot_type_cat, intens_cat, burn_date_cat) |>
-  mutate(across(starts_with("seedl_dens_"), ~.*10000)) |>
-  mutate(across(starts_with("cone_dens_"), ~.*10000)) |>
-  mutate(across(starts_with("seedl_dens_"), ~round(., 0))) |>
-  mutate(across(starts_with("cone_dens_"), ~round(., 0)))
+  arrange(plot_type_cat, intens_cat, burn_date_cat)
 
 summ
 

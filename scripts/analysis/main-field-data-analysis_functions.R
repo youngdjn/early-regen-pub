@@ -31,6 +31,7 @@ prep_d_sp = function(sp) {
            prefire_prop_sp = matches(paste0("^", prefire_prop_var, "$"), ignore.case = FALSE),
            starts_with("seedl_dens_"),
            starts_with("cone_dens_"),
+           starts_with("under_cones_new_"),
            starts_with("prefire_prop_")) |>
     filter(ifelse(plot_type == "seedwall", grn_vol_sp > 20, prefire_prop_sp > 20)) |> # the criteria for keeping the plot based on its species comp depend on whether it's a seed wall or core area plot (for seed wall use seed wall comp)
     filter(ifelse(plot_type == "seedwall", vol_grn_10m < 20, TRUE)) # seed wall plots need to have < 20% pre-fire green canopy within 10 m
