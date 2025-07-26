@@ -174,8 +174,8 @@ dev.off()
 
 p1a = p1 +
   theme(legend.box = "horizontal",
-        legend.position = c(0.3,0.2),
-        legend.box.background = element_rect(fill="white", color = "black", linewidth = 0.3),
+        legend.position = c(0.32,0.175),
+        legend.box.background = element_rect(fill="white", color = "black", linewidth = 0.6),
         legend.spacing.x = unit(0.0, "cm")
   )
 p1a
