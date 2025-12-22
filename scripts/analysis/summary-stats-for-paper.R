@@ -15,7 +15,7 @@ datadir = readLines(here("data_dir.txt"), n=1)
 source("scripts/analysis/main-field-data-analysis_functions.R")
 
 # Load data
-d = read_csv(file.path(datadir,"field-data/processed/plot-data-prepped_v2.csv"))
+d = read_csv(file.path(datadir,"plot-data-prepped.csv"))
 
 # Prep the plots used for the "all species" analyses
 d_sp = prep_d_sp("ALL")
